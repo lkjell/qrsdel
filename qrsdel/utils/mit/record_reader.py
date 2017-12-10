@@ -19,18 +19,19 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.
 """
 
-__author__="T. Teijeiro"
-__date__ ="$30-nov-2011 18:01:49$"
-
+__author__ = "T. Teijeiro"
+__date__ = "$30-nov-2011 18:01:49$"
 
 import numpy
 from subprocess import check_output
+
 
 class MITRecord(object):
     """
     This class includes the information related to a record in MIT-BIH format,
     including the number of signals and their sampling frequency.
     """
+
     def __init__(self):
         self.signal = None
         self.frequency = 0.0
@@ -38,14 +39,15 @@ class MITRecord(object):
 
     @property
     def length(self):
-        return max(len(self.signal[i]) for i in xrange(len(self.leads)))
+        return max(len(self.signal[i]) for i in range(len(self.leads)))
+
 
 def get_leads(record_path):
     """Obtains a list with the name of the leads of a specific record."""
     return check_output(['signame', '-r', record_path]).splitlines()
 
 
-def load_MIT_record(record_path, physical_units= False):
+def load_MIT_record(record_path, physical_units=False):
     """
     Loads a MIT-BIH record using rdsamp. The correct number of signals in the
     file must be passed as argument to ensure a correct load.
@@ -64,34 +66,34 @@ def load_MIT_record(record_path, physical_units= False):
         Matrix with the signal, with one row for each signal, and a column
         for each sample.
     """
-    #First we obtain the recognized signals in the record
+    # First we obtain the recognized signals in the record
     leads = get_leads(record_path)
     if not leads:
         raise ValueError('None of the signals in the {0} record is '
-                           'recognizable as an ECG signal'.format(record_path))
+                         'recognizable as an ECG signal'.format(record_path))
     num_signals = len(leads)
-    #We obtain the string representation of the record
+    # We obtain the string representation of the record
     command = ['rdsamp', '-r', record_path]
     if physical_units:
         command.append('-P')
-    #We load only the recognized signal names.
+    # We load only the recognized signal names.
     command.append('-s')
     command.extend(leads)
     string = check_output(command)
     if physical_units:
-        #HINT Bug in some cases with physical units conversion in rdsamp.
+        # HINT Bug in some cases with physical units conversion in rdsamp.
         string = string.replace('-', '-0')
-    #Convert to matrix
-    mat = numpy.fromstring(string, sep= '\t')
-    #We reshape it according to the number of signals + 1 (the first column)
-    #is the number of sample, but it is not of our interest.
-    mat = mat.reshape(((len(mat)/(num_signals + 1)), num_signals + 1))
+    # Convert to matrix
+    mat = numpy.fromstring(string, sep='\t')
+    # We reshape it according to the number of signals + 1 (the first column)
+    # is the number of sample, but it is not of our interest.
+    mat = mat.reshape(((len(mat) / (num_signals + 1)), num_signals + 1))
     result = MITRecord()
-    #We remove the first column, and transpose the result
+    # We remove the first column, and transpose the result
     result.signal = mat[:, 1:].T
-    #We include the loaded leads
+    # We include the loaded leads
     result.leads = leads
-    #And the sampling frequency
+    # And the sampling frequency
     result.frequency = float(check_output(['sampfreq', record_path]))
     return result
 

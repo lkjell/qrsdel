@@ -24,16 +24,16 @@ License along with this library.
 
 import scipy.stats
 import numpy as np
-from constants import CONSTANTS as C
+from .constants import CONSTANTS as C
 from ..signal_buffer import get_signal_fragment
 
 
 def mode(signal):
     """Obtains the mode of a signal fragment"""
-    nbins = int((signal.max()-signal.min())/C.BL_MARGIN) or 1
+    nbins = int((signal.max() - signal.min()) / C.BL_MARGIN) or 1
     hist = np.histogram(signal, nbins)
     peak = hist[0].argmax()
-    return hist[1][peak] + (hist[1][peak+1]-hist[1][peak])/2.0
+    return hist[1][peak] + (hist[1][peak + 1] - hist[1][peak]) / 2.0
 
 
 def kurtosis(signal):
@@ -43,24 +43,26 @@ def kurtosis(signal):
     """
     return scipy.stats.kurtosis(signal)
 
+
 def mvkurtosis(arr):
     """
     Obtains the kurtosis of a multivariate array of data. The first dimension
     of *arr* contains the variables, and the second the values.
     """
     n = np.size(arr, 1)
-    #Mean vector and corrected covariance matrix
+    # Mean vector and corrected covariance matrix
     med = np.mean(arr, 1)
-    s = np.cov(arr)*(n-1)/n
-    #Eigenvalue and eigenvector calculation
+    s = np.cov(arr) * (n - 1) / n
+    # Eigenvalue and eigenvector calculation
     lamb, v = np.linalg.eig(s)
-    si12 = np.dot(np.dot(v, np.diag(1.0/np.sqrt(lamb))), np.transpose(v))
-    #Multivariant standardization
+    si12 = np.dot(np.dot(v, np.diag(1.0 / np.sqrt(lamb))), np.transpose(v))
+    # Multivariant standardization
     medrep = np.transpose(np.repeat(np.asmatrix(med), n, 0))
-    xs = np.dot(np.transpose(arr-medrep), si12)
-    #Similarities
+    xs = np.dot(np.transpose(arr - medrep), si12)
+    # Similarities
     r = np.dot(xs, np.transpose(xs))
-    return np.sum(np.diag(r)**2)/n
+    return np.sum(np.diag(r) ** 2) / n
+
 
 def mvskewness(arr):
     """
@@ -68,18 +70,19 @@ def mvskewness(arr):
     of *arr* contains the variables, and the second the values.
     """
     n = np.size(arr, 1)
-    #Mean vector and corrected covariance matrix
+    # Mean vector and corrected covariance matrix
     med = np.mean(arr, 1)
-    s = np.cov(arr)*(n-1)/n
-    #Eigenvalue and eigenvector calculation
+    s = np.cov(arr) * (n - 1) / n
+    # Eigenvalue and eigenvector calculation
     lamb, v = np.linalg.eig(s)
-    si12 = np.dot(np.dot(v, np.diag(1.0/np.sqrt(lamb))), np.transpose(v))
-    #Multivariant standardization
+    si12 = np.dot(np.dot(v, np.diag(1.0 / np.sqrt(lamb))), np.transpose(v))
+    # Multivariant standardization
     medrep = np.transpose(np.repeat(np.asmatrix(med), n, 0))
-    xs = np.dot(np.transpose(arr-medrep), si12)
-    #Similarities
+    xs = np.dot(np.transpose(arr - medrep), si12)
+    # Similarities
     r = np.array(np.dot(xs, np.transpose(xs)))
-    return np.sum(r**3)/(n*n)
+    return np.sum(r ** 3) / (n * n)
+
 
 def get_peaks(arr):
     """
@@ -100,20 +103,21 @@ def get_peaks(arr):
     if len(arr) < 3:
         raise ValueError("The array needs to have at least three values")
     sdif = np.sign(np.diff(arr))
-    #If all the series has zero derivative, there are no peaks.
+    # If all the series has zero derivative, there are no peaks.
     if not np.any(sdif):
         return np.array([])
-    #If the sequence starts with a zero derivative, we associate it to the
-    #first posterior trend.
+    # If the sequence starts with a zero derivative, we associate it to the
+    # first posterior trend.
     if sdif[0] == 0:
         i = 1
         while sdif[i] == 0:
             i += 1
         sdif[0] = sdif[i]
-    for i in xrange(1, len(sdif)):
+    for i in range(1, len(sdif)):
         if sdif[i] == 0:
-            sdif[i] = sdif[i-1]
-    return np.where(sdif[1:]!=sdif[:-1])[0] + 1
+            sdif[i] = sdif[i - 1]
+    return np.where(sdif[1:] != sdif[:-1])[0] + 1
+
 
 def characterize_baseline(lead, beg, end):
     """
@@ -139,11 +143,11 @@ def characterize_baseline(lead, beg, end):
         of the fragment where the baseline has been estimated.
     """
     assert beg >= 0 and end >= beg
-    #We need at least 1 second of signal to estimate the baseline and the
-    #quality.
-    if end-beg < C.BL_MIN_LEN:
-        center = beg + (end - beg)/2.0
-        beg = max(0, int(center - C.BL_MIN_LEN/2))
-        end = int(center + C.BL_MIN_LEN/2)
+    # We need at least 1 second of signal to estimate the baseline and the
+    # quality.
+    if end - beg < C.BL_MIN_LEN:
+        center = beg + (end - beg) / 2.0
+        beg = max(0, int(center - C.BL_MIN_LEN / 2))
+        end = int(center + C.BL_MIN_LEN / 2)
     signal = get_signal_fragment(beg, end, lead=lead)[0]
     return (mode(signal), kurtosis(signal))

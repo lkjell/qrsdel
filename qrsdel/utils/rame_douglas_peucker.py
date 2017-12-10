@@ -38,18 +38,20 @@ except ImportError:
     from blist import sortedlist as SortedList
     from blist import sorteddict as _SortedDict
 
+
     class SortedDict(_SortedDict):
         def popitem(self, last=False):
             # blist.sorteddict only supports popping the first item.
             assert last == False
             return super(SortedDict, self).popitem()
 
+
 def array2points(array):
     """
     Creates a list of pairs (x,y) from an array of y values, to make it
     suitable to be processed by the RDP function.
     """
-    return [(i, array[i]) for i in xrange(len(array))]
+    return [(i, array[i]) for i in range(len(array))]
 
 
 def arrayRDP(arr, epsilon=0.0, n=None):
@@ -85,26 +87,27 @@ def arrayRDP(arr, epsilon=0.0, n=None):
     if n < 3:
         return arr
     fragments = SortedDict()
-    #We store the distances as negative values due to the default order of
-    #sorteddict
+    # We store the distances as negative values due to the default order of
+    # sorteddict
     dist, idx = max_vdist(arr, 0, len(arr) - 1)
     fragments[(-dist, idx)] = (0, len(arr) - 1)
-    while len(fragments) < n-1:
+    while len(fragments) < n - 1:
         (dist, idx), (first, last) = fragments.popitem(last=False)
         if -dist <= epsilon:
-            #We have to put again the last item to prevent loss
+            # We have to put again the last item to prevent loss
             fragments[(dist, idx)] = (first, last)
             break
         else:
-            #We have to break the fragment in the selected index
+            # We have to break the fragment in the selected index
             dist, newidx = max_vdist(arr, first, idx)
             fragments[(-dist, newidx)] = (first, idx)
             dist, newidx = max_vdist(arr, idx, last)
             fragments[(-dist, newidx)] = (idx, last)
-    #Now we have to get all the indices in the keys of the fragments in order.
-    result = SortedList(i[0] for i in fragments.itervalues())
+    # Now we have to get all the indices in the keys of the fragments in order.
+    result = SortedList(i[0] for i in fragments.values())
     result.add(len(arr) - 1)
     return np.array(result)
+
 
 def max_vdist(arr, first, last):
     """
@@ -114,12 +117,12 @@ def max_vdist(arr, first, last):
     """
     if first == last:
         return (0.0, first)
-    frg = arr[first:last+1]
-    leng = last-first+1
-    dist = np.abs(frg - np.interp(np.arange(leng), [0, leng-1],
-                                                            [frg[0], frg[-1]]))
+    frg = arr[first:last + 1]
+    leng = last - first + 1
+    dist = np.abs(frg - np.interp(np.arange(leng), [0, leng - 1],
+                                  [frg[0], frg[-1]]))
     idx = np.argmax(dist)
-    return (dist[idx], first+idx)
+    return (dist[idx], first + idx)
 
 
 def _aRDP(arr, epsilon):
@@ -138,7 +141,7 @@ def _aRDP(arr, epsilon):
         first, last = stack.pop()
         max_dist, idx = max_vdist(arr, first, last)
         if max_dist > epsilon:
-            stack.extend([(first, idx),(idx, last)])
+            stack.extend([(first, idx), (idx, last)])
         else:
             result.update((first, last))
     return np.array(sorted(result))
@@ -155,16 +158,16 @@ def RDP(pts, epsilon):
     last = pts[-1]
     idx = -1
     max_dist = 0
-    for i in xrange(1, len(pts)-1):
-        #We obtain the perpendicular distance of each point to the line
-        #delimited by the two points.
+    for i in range(1, len(pts) - 1):
+        # We obtain the perpendicular distance of each point to the line
+        # delimited by the two points.
         if first[0] == last[0]:
             dist = abs(pts[i][0] - first[0])
         else:
-            slope = (last[1] - first[1]) / float(last[0] -first[0])
+            slope = (last[1] - first[1]) / float(last[0] - first[0])
             intercept = first[1] - (slope * first[0])
             dist = (abs(slope * pts[i][0] - pts[i][1] + intercept)
-                                                / math.sqrt(slope * slope + 1))
+                    / math.sqrt(slope * slope + 1))
         if dist > max_dist:
             max_dist = dist
             idx = i
@@ -177,9 +180,10 @@ def RDP(pts, epsilon):
 
 
 if __name__ == "__main__":
-    #Small demo of the results of the RDP algorithm with a real ECG fragment.
+    # Small demo of the results of the RDP algorithm with a real ECG fragment.
     # pylint: disable-msg=C0103
     import pylab
+
     signal = np.genfromtxt('../../records/100_MLII.txt')
     rp = arrayRDP(signal, 10)
     fig = pylab.figure()

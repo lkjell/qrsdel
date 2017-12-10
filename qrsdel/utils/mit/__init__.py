@@ -20,7 +20,7 @@ License along with this library.
 __author__ = "T. Teijeiro"
 __date__ = "$02-feb-2012 17:50:53$"
 
-import ECGCodes
-from record_reader import load_MIT_record, MITRecord, get_leads
-from annotations import (MITAnnotation, read_annotations,
-                         is_qrs_annotation, save_annotations)
+from . import ECGCodes
+from .record_reader import load_MIT_record, MITRecord, get_leads
+from .annotations import (MITAnnotation, read_annotations,
+                          is_qrs_annotation, save_annotations)

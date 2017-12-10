@@ -21,7 +21,8 @@ License along with this library.
 @author: T. Teijeiro
 """
 
-def verify(expression, messagestr = None, messageargs = None):
+
+def verify(expression, messagestr=None, messageargs=None):
     """
     This function provides an equivalent functionality to the *assert* builtin,
     but it cannot be disabled at compile time. It is very useful to check if a
@@ -41,8 +42,7 @@ def verify(expression, messagestr = None, messageargs = None):
     """
     messageargs = messageargs or []
     if not expression:
-        raise (InconsistencyError() if messagestr is None
-                      else InconsistencyError(messagestr.format(*messageargs)))
+        raise InconsistencyError()
 
 
 class InconsistencyError(Exception):

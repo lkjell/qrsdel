@@ -24,6 +24,7 @@ License along with this library.
 import numpy as np
 from collections import namedtuple
 
+
 class LeadInfo(namedtuple('LeadInfo', 'lead, sig, points, baseline, quality')):
     """
     This structure contains the necessary information to perform a complete
@@ -58,6 +59,7 @@ class QRS(object):
         Boolean attribute indicating whether the QRS complex is paced or not.
     start, peak, end: Delineation points of the QRS.
     """
+
     def __init__(self):
         super(QRS, self).__init__()
         self.start = 0
@@ -74,6 +76,7 @@ class QRSShape(object):
     an amplitude and energy and maximum slope measures, and a numpy array
     representing the signal.
     """
+
     def __init__(self):
         super(QRSShape, self).__init__()
         self.waves = ()
@@ -92,13 +95,14 @@ class QRSShape(object):
                     self.amplitude == other.amplitude and
                     self.energy == other.energy and
                     self.maxslope == other.maxslope and
-                    self.tag == other.tag and np.all(self.sig==other.sig))
+                    self.tag == other.tag and np.all(self.sig == other.sig))
         return False
 
     def move(self, displacement):
         """Moves the temporal references of the waves forming this shape"""
         for wave in self.waves:
             wave.move(displacement)
+
 
 class Interval(object):
     """
@@ -114,7 +118,7 @@ class Interval(object):
         "Construct, start must be <= end."
         if start > end:
             raise ValueError('Start (%s) must not be greater than end (%s)'
-                              % (start, end))
+                             % (start, end))
         self._start = start
         self._end = end
 
@@ -128,16 +132,13 @@ class Interval(object):
         """The interval's end"""
         return self._end
 
-
     def __str__(self):
         "As string."
         return '[%s,%s]' % (self.start, self.end)
 
-
     def __repr__(self):
         "String representation."
         return '[%s,%s]' % (self.start, self.end)
-
 
     def __cmp__(self, other):
         "Compare."
@@ -149,11 +150,9 @@ class Interval(object):
         else:
             return cmp(self.end, other.end)
 
-
     def __hash__(self):
         "Hash."
         return hash(self.start) ^ hash(self.end)
-
 
     def intersection(self, other):
         "Intersection. @return: An empty intersection if there is none."
@@ -183,7 +182,7 @@ class Interval(object):
 
     def move(self, offset):
         "@return: Interval displaced offset to start and end"
-        return Interval(self.start+offset, self.end+offset)
+        return Interval(self.start + offset, self.end + offset)
 
     def __contains__(self, item):
         "@return: True iff item in self."
@@ -194,11 +193,9 @@ class Interval(object):
         "@return: True iff 0 in self."
         return self.start <= 0 and 0 <= self.end
 
-
     def subset(self, other):
         "@return: True iff self is subset of other."
         return self.start >= other.start and self.end <= other.end
-
 
     def proper_subset(self, other):
         "@return: True iff self is proper subset of other."
@@ -218,7 +215,6 @@ class Interval(object):
     def singleton(self):
         "@return: True iff self.end - self.start == 1."
         return self.end - self.start == 1
-
 
     def separation(self, other):
         "@return: The distance between self and other."
